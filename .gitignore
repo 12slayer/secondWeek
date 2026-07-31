@@ -1,8 +1,22 @@
 # Dependencies
 node_modules/
+<<<<<<< HEAD
 
 # Environment variables (contains secrets — never commit this)
 .env
+=======
+*/node_modules/
+
+# Environment variables (contains secrets — never commit this)
+.env
+*/.env
+.env.local
+*/.env.local
+
+# Build output
+dist/
+*/dist/
+>>>>>>> 7f4537cb9c3e49e8f34d554a91dd879863d1adcf
 
 # Logs
 npm-debug.log*
@@ -16,7 +30,10 @@ Thumbs.db
 # Editor folders
 .vscode/
 .idea/
+<<<<<<< HEAD
 
 # Uploaded profile images (user content, not source code)
 uploads/*
 !uploads/.gitkeep
+=======
+>>>>>>> 7f4537cb9c3e49e8f34d554a91dd879863d1adcf
