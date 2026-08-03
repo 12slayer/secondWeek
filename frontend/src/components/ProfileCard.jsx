@@ -1,11 +1,29 @@
 import Avatar from './Avatar.jsx';
 import { SERVER_URL } from '../api/profiles.js';
 
-export default function ProfileCard({ profile, onEdit, onDelete }) {
+export default function ProfileCard({ profile, onEdit, onDelete, onToggleFavorite }) {
   const hasPhoto = Boolean(profile.avatarUrl);
 
   return (
-    <div className="profile-card">
+    <div className="profile-card" style={{ position: 'relative' }}>
+      <button
+        onClick={() => onToggleFavorite(profile.id)}
+        title={profile.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          background: 'none',
+          border: 'none',
+          fontSize: '18px',
+          cursor: 'pointer',
+          color: profile.isFavorite ? 'var(--accent)' : 'var(--border)',
+          lineHeight: 1
+        }}
+      >
+        ★
+      </button>
+
       {hasPhoto ? (
         <img
           className="profile-photo"

@@ -3,7 +3,8 @@ import {
   getProfiles,
   createProfile,
   updateProfile,
-  deleteProfile
+  deleteProfile,
+  toggleFavorite
 } from './api/profiles.js';
 import ProfileCard from './components/ProfileCard.jsx';
 import ProfileForm from './components/ProfileForm.jsx';
@@ -13,14 +14,15 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [search, setSearch] = useState('');
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
 
-  const loadProfiles = async () => {
+  const loadProfiles = async (searchTerm = search) => {
     setLoading(true);
     setLoadError('');
     try {
-      const data = await getProfiles();
+      const data = await getProfiles(searchTerm);
       setProfiles(data);
     } catch (err) {
       setLoadError(
@@ -31,9 +33,19 @@ export default function App() {
     }
   };
 
+  // Load once on mount
   useEffect(() => {
-    loadProfiles();
+    loadProfiles('');
   }, []);
+
+  // Re-fetch from the server 300ms after the user stops typing (debounce),
+  // instead of firing a request on every keystroke
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      loadProfiles(search);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [search]);
 
   const handleSave = async (formData) => {
     if (editingProfile) {
@@ -52,6 +64,11 @@ export default function App() {
     loadProfiles();
   };
 
+  const handleToggleFavorite = async (id) => {
+    await toggleFavorite(id);
+    loadProfiles();
+  };
+
   const openCreate = () => {
     setEditingProfile(null);
     setFormOpen(true);
@@ -62,9 +79,7 @@ export default function App() {
     setFormOpen(true);
   };
 
-  const filtered = profiles.filter((p) =>
-    `${p.name} ${p.jobTitle} ${p.email}`.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = favoritesOnly ? profiles.filter((p) => p.isFavorite) : profiles;
 
   return (
     <div style={{ maxWidth: '960px', margin: '0 auto', padding: '48px 24px' }}>
@@ -96,21 +111,29 @@ export default function App() {
         </button>
       </header>
 
-      <input
-        placeholder="Search by name, title, or email…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '12px 16px',
-          borderRadius: '10px',
-          border: '1px solid var(--border)',
-          fontSize: '14px',
-          marginBottom: '28px',
-          background: 'var(--surface)',
-          boxShadow: 'var(--shadow-sm)'
-        }}
-      />
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '28px' }}>
+        <input
+          placeholder="Search by name, title, or email…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            flex: 1,
+            padding: '12px 16px',
+            borderRadius: '10px',
+            border: '1px solid var(--border)',
+            fontSize: '14px',
+            background: 'var(--surface)',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        />
+        <button
+          onClick={() => setFavoritesOnly((prev) => !prev)}
+          className={favoritesOnly ? 'btn btn-primary' : 'btn btn-ghost'}
+          style={{ padding: '0 16px', whiteSpace: 'nowrap' }}
+        >
+          ★ Favorites
+        </button>
+      </div>
 
       {loading && <p style={{ color: 'var(--ink-muted)' }}>Loading profiles…</p>}
 
@@ -137,6 +160,7 @@ export default function App() {
             profile={profile}
             onEdit={openEdit}
             onDelete={handleDelete}
+            onToggleFavorite={handleToggleFavorite}
           />
         ))}
       </div>

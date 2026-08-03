@@ -11,15 +11,16 @@ datasource db {
 }
 
 model Profile {
-  id        String   @id @default(uuid())
-  name      String
-  email     String
-  jobTitle  String?  @default("")
-  phone     String?  @default("")
-  bio       String?  @default("")
-  avatarUrl String?  @default("") @map("avatar_url")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt      @map("updated_at")
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  jobTitle   String?  @default("") @map("job_title")
+  phone      String?  @default("")
+  bio        String?  @default("")
+  avatarUrl  String?  @default("") @map("avatar_url")
+  isFavorite Boolean  @default(false) @map("is_favorite")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt      @map("updated_at")
 
   @@map("profiles")
 }

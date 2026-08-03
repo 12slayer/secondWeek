@@ -4,7 +4,11 @@ import axios from 'axios';
 export const SERVER_URL = 'http://localhost:3000';
 const API_URL = `${SERVER_URL}/profiles`;
 
-export const getProfiles = () => axios.get(API_URL).then((res) => res.data);
+export const getProfiles = (search = '') =>
+  axios.get(API_URL, { params: search ? { search } : {} }).then((res) => res.data);
+
+export const toggleFavorite = (id) =>
+  axios.patch(`${API_URL}/${id}/favorite`).then((res) => res.data);
 
 export const getProfile = (id) =>
   axios.get(`${API_URL}/${id}`).then((res) => res.data);
