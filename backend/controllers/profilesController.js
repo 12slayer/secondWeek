@@ -11,11 +11,22 @@ const deleteUploadedFile = (avatarUrl) => {
   });
 };
 
-// GET /profiles
+// GET /profiles?search=jane
 const getAll = async (req, res, next) => {
   try {
+    const { search } = req.query;
+
     const profiles = await prisma.profile.findMany({
-      orderBy: { createdAt: 'desc' }
+      where: search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { email: { contains: search, mode: 'insensitive' } },
+              { jobTitle: { contains: search, mode: 'insensitive' } }
+            ]
+          }
+        : undefined,
+      orderBy: [{ isFavorite: 'desc' }, { createdAt: 'desc' }]
     });
     res.json(profiles);
   } catch (err) {
@@ -94,4 +105,20 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, getOne, create, update, remove };
+// PATCH /profiles/:id/favorite
+const toggleFavorite = async (req, res, next) => {
+  try {
+    const existing = await prisma.profile.findUnique({ where: { id: req.params.id } });
+    if (!existing) return res.status(404).json({ error: 'Profile not found' });
+
+    const updated = await prisma.profile.update({
+      where: { id: req.params.id },
+      data: { isFavorite: !existing.isFavorite } // flip the current value
+    });
+    res.json(updated);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getAll, getOne, create, update, remove, toggleFavorite };
