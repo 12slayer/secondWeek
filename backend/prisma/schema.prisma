@@ -1,0 +1,25 @@
+// Prisma schema — defines your PostgreSQL tables and generates a
+// type-safe client (prisma.profile.find/create/update/delete...)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  jobTitle  String?  @default("")
+  phone     String?  @default("")
+  bio       String?  @default("")
+  avatarUrl String?  @default("") @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt      @map("updated_at")
+
+  @@map("profiles")
+}
